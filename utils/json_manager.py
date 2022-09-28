@@ -114,6 +114,8 @@ class JsonManager(StorageManager):
         
         cur_pos -= 1
         self.data[queue_name]['cur'] = cur_pos
+        await self._write(self.data)
+
         return self.data[queue_name]['users'][cur_pos]
 
     async def offset_cursor(self, queue_name: str) -> str:
@@ -126,6 +128,8 @@ class JsonManager(StorageManager):
             cur_pos = 0
         
         self.data[queue_name]['cur'] = cur_pos
+        await self._write(self.data)
+
         return self.data[queue_name]['users'][cur_pos]
 
     async def _read(self) -> dict[str, Any]:
@@ -139,8 +143,7 @@ class JsonManager(StorageManager):
     async def _write(self, data: dict[str, Any]) -> dict:
         """Write self.data to json file"""
 
-        self.data = data
-        json_content = json.dumps(self.data)
+        json_content = json.dumps(data)
         await self._storage.seek(0)
         await self._storage.truncate()
         await self._storage.write(json_content)
