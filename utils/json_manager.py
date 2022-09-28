@@ -1,5 +1,5 @@
 import json
-from typing import Optional
+from typing import Any, Optional, Union
 
 from aiofiles import open
 
@@ -7,8 +7,20 @@ from utils.storage_manager import StorageManager
 
 
 class JsonManager(StorageManager):
+    """Manager of JSON queues storage
+    JSON scheme:
+    {
+        "Queue1": {"pos": 0, "users": ["Alex", "Peter", ...]},
+        ...
+    }
+
+    pos - position of cursor at queue user list
+    users - list of queues members
+
+    """
+
     def __init__(self) -> None:
-        self.data = {}
+        self.queues: dict[str, Any] = {}
 
     async def connect(self, storage_path: str):
         """Connect to json file by path
@@ -18,100 +30,124 @@ class JsonManager(StorageManager):
 
         """
         self._storage = await open(storage_path, 'r+')
+        self.data = await self._read()
 
     async def add_queue(self, queue_name: str) -> int:
-        data = await self._read()
-        if queue_name in data:
-            return False
+        if queue_name in self.data:
+            return 0
 
-        data[queue_name] = []
-        await self._write(data)
+        self.data[queue_name] = {"cur": 0, "users": []}
+        await self._write(self.data)
 
-        return True
+        return 1
 
     async def remove_queue(self, queue_name: str) -> int:
-        data = await self._read()
-        if queue_name not in data:
-            return False
+        if queue_name not in self.data:
+            return 0
 
-        data.pop(queue_name)
-        await self._write(data)
+        self.data.pop(queue_name)
+        await self._write(self.data)
 
-        return True
+        return 1
 
     async def add_to_queue(self, queue_name: str, full_name: str) -> int:
-        data = await self._read()
-        if queue_name not in data:
+        if queue_name not in self.data:
             return -1
 
-        if full_name in data[queue_name]:
+        if full_name in self.data[queue_name]['users']:
             return -2
 
-        data[queue_name].append(full_name)
-        await self._write(data)
+        cur = self.data[queue_name]['cur']
+        self.data[queue_name]['users'].append(full_name)
+        await self._write(self.data)
 
-        return len(data[queue_name])
+        return len(self.data[queue_name]['users'])
 
     async def remove_from_queue(self, queue_name: str, full_name: str) -> int:
-        data = await self._read()
-        if queue_name not in data:
+        if queue_name not in self.data:
             return -1
 
-        if full_name not in data[queue_name]:
+        if full_name not in self.data[queue_name]['users']:
             return -2
 
-        data[queue_name].remove(full_name)
-        await self._write(data)
+        user_index = self.data[queue_name]['users'].index(full_name)
+        if user_index <= self.data[queue_name]['cur'] and user_index:
+            self.data[queue_name]['cur'] -= 1
 
-        return len(data[queue_name])
+        self.data[queue_name]['users'].remove(full_name)
+        await self._write(self.data)
 
-    async def get_queue_members(self, queue_name: str) -> Optional[list[str]]:
-        data = await self._read()
-        return data.get(queue_name, None)
+        return len(self.data[queue_name]['users'])
 
-    async def get_queues(self) -> dict[str, list[str]]:
-        data = await self._read()
-        return data
+    async def get_queue(self, queue_name: str) -> Optional[dict[str, Any]]:
+        return self.data.get(queue_name, None)
+
+    async def get_queues(self) -> dict[str, dict[str, Any]]:
+        return self.data
 
     async def get_user_in(self, queue_name: str, full_name: str) -> int:
-        data = await self._read()
-        if queue_name not in data:
+        if queue_name not in self.data:
             return -1
 
-        if full_name not in data[queue_name]:
+        if full_name not in self.data[queue_name]['users']:
             return -2
 
-        return data[queue_name].index(full_name) + 1
+        user_index = self.data[queue_name]['users'].index(full_name)
+        cur = self.data[queue_name]['cur']
+        return user_index - cur + 1 if cur <= user_index else -3
 
     async def get_user_in_all(self, full_name: str) -> dict[str, int]:
-        data = await self._read()
         result = {}
-        for q_name in data:
+        for q_name in self.data:
             pos = await self.get_user_in(q_name, full_name)
-            if pos >= 0:
+            if pos > 0:
                 result[q_name] = pos
 
         return result
 
-    async def _read(self) -> dict:
-        """Read and return data from json file"""
+    async def set_cursor_at(self, queue_name: str, cur_pos: int) -> Union[str, int]:
+        if queue_name not in self.data:
+            return -1
+        
+        if cur_pos > len(self.data[queue_name]['users']) or cur_pos < 1:
+            return -2
+        
+        cur_pos -= 1
+        self.data[queue_name]['cur'] = cur_pos
+        return self.data[queue_name]['users'][cur_pos]
+
+    async def offset_cursor(self, queue_name: str) -> str:
+        if queue_name not in self.data:
+            return -1
+        
+        cur_pos = self.data[queue_name]['cur']
+        cur_pos += 1
+        if cur_pos == len(self.data[queue_name]['users']):
+            cur_pos = 0
+        
+        self.data[queue_name]['cur'] = cur_pos
+        return self.data[queue_name]['users'][cur_pos]
+
+    async def _read(self) -> dict[str, Any]:
+        """Read and return self.data from json file"""
 
         await self._storage.seek(0)
         json_content = await self._storage.read()
-        data = json.loads(json_content)
-    
-        return data
+        self.data = json.loads(json_content)
+        return self.data
 
-    async def _write(self, data) -> dict:
-        """Write data to json file"""
+    async def _write(self, data: dict[str, Any]) -> dict:
+        """Write self.data to json file"""
 
         self.data = data
-        json_content = json.dumps(data)
+        json_content = json.dumps(self.data)
         await self._storage.seek(0)
         await self._storage.truncate()
         await self._storage.write(json_content)
         await self._storage.flush()
 
     async def __del__(self):
-        self._write(self.data)
+        """Close storage file"""
+
+        self._write(self.self.data)
         self._storage.close()

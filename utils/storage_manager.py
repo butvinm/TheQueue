@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Any, Optional, Union
 
 
 class StorageWriter(ABC):
@@ -59,6 +59,28 @@ class StorageWriter(ABC):
                 -1 if queue does not exist
         """
 
+    @abstractmethod
+    def set_cursor_at(self, queue_name: str, cur_pos: int) -> Union[str, int]:
+        """Set cursor position in queue at specified position
+
+        Args:
+            queue_name (str): Name of target queue
+            cur_pos (int): Position of cursor
+
+        Returns:
+            Union[str, int]: -1 if queue does not exist, -2 if out of bound, else full name of current user
+        """
+    
+    @abstractmethod
+    def offset_cursor(self, queue_name: str) -> Union[str, int]:
+        """Increase cursor position at one. If out of bound set to begin of queue
+
+        Args:
+            queue_name (str): Name of target queue
+
+        Returns:
+            Union[str, int]: -1 if queue does not exist, full name of current user
+        """
 
 class StorageReader(ABC):
     """Interface for bot connection with data storage. Read-only"""
@@ -68,46 +90,46 @@ class StorageReader(ABC):
         """Connect Reader to storage (json, local/cloud database, google sheets, etc"""
 
     @abstractmethod
-    def get_queue_members(queue_name: str) -> Optional[list[str]]:
+    def get_queue(queue_name: str) -> Optional[dict[str, Any]]:
         """ See Returns
 
         Args:
             queue_name (str): Name of target queue
 
         Returns:
-            Optional[list[str]]: Return list of queue members or None if queue does not exist
+            Optional[dict[str, Any]]: Queue as {'cur': int, 'users': list[str]} or None if name does not exist
         """
-        
+
     @abstractmethod
-    def get_queues() -> dict[str, list[str]]:
+    def get_queues() -> dict[str, dict[str, Any]]:
         """See Returns
 
         Returns:
-            dict[str, list[str]]: All queues: key - Queue name, value - Queue members. 
+            list[dict[str, Any]]: Dictionary: key - queue name, value - queue as {'cur': int, 'users': list[str]}. 
                                 Can be empty
         """
 
     @abstractmethod
     def get_user_in(queue_name: str, full_name: str) -> int:
-        """Return user positions in queue
+        """Return user distance to queue cursor
 
         Args:
             queue_name (str): Target queue
             full_name (str): Telegram fullname of user
 
         Returns:
-            int: -1 if queue not exist, -2 if not consist, else position in queue
+            int: -1 if queue not exist, -2 if not consist, -3 if user above cursor, else distance to cursor
         """
 
     @abstractmethod
     def get_user_in_all(full_name: str) -> dict[str, int]:
-        """Return user positions in all queues where him consists
+        """Return user distances to cursor in all queues where him consists
 
         Args:
             full_name (str): Telegram fullname of user
 
         Returns:
-            dict[str, int]: User positions in queues: key - Queue name, value - position
+            dict[str, int]: User distances in queues: key - Queue name, value - distance
         """
 
 

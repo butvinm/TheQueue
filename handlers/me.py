@@ -7,8 +7,8 @@ async def me(message: Message):
     args = message.text.split()
     if len(args) == 1:
         poses = await sm.get_user_in_all(full_name)
-        print(poses)
         text = f'{full_name} positions at queues:\n'
+        print(poses)
         for q_name, pos in poses.items():
             text += f'{q_name}: {pos}\n'
 

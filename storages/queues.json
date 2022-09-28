@@ -1,11 +1,1 @@
-{
-	"Queue1": ["Alena Belkina"],
-	"Queue2": ["Alena Belkina"],
-	"New": [],
-	"Queue3": [
-		"\u041c\u0438\u0445\u0430\u0438\u043b \u0411\u0443\u0442\u0432\u0438\u043d"
-	],
-	"Queue4": [
-		"\u041c\u0438\u0445\u0430\u0438\u043b \u0411\u0443\u0442\u0432\u0438\u043d"
-	]
-}
+{"Queue1": {"cur": 0, "users": ["Alena Belkina"]}, "Queue2": {"cur": 0, "users": ["Alena Belkina"]}, "Queue New": {"cur": 0, "users": ["\u041c\u0438\u0445\u0430\u0438\u043b \u0411\u0443\u0442\u0432\u0438\u043d"]}}

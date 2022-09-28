@@ -4,6 +4,10 @@ from bot import dp, sm
 
 @dp.message_handler(commands=['remove'])
 async def remove(message: Message):
+    if message.from_user.username != 'butvin_mihail':
+        await message.answer('Sorry, you have not access to that command')
+        return
+
     args = message.text.split()
     if len(args) == 1:
         await message.answer(
@@ -21,3 +25,4 @@ async def remove(message: Message):
                 f'Queue "{queue_name}" does not exists.\n' 
                 'Call /list@queue2421_bot to watch existing queues'
             )
+            
