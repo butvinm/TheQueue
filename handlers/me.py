@@ -6,7 +6,7 @@ async def me(message: Message):
     full_name = message.from_user.full_name
     args = message.text.split()
     if len(args) == 1:
-        poses = sm.get_user_in_all(full_name)
+        poses = await sm.get_user_in_all(full_name)
         print(poses)
         text = f'{full_name} positions at queues:\n'
         for q_name, pos in poses.items():
@@ -16,7 +16,7 @@ async def me(message: Message):
 
     else:
         queue_name = ' '.join(args[1:])
-        pos = sm.get_user_in(queue_name, full_name)
+        pos = await sm.get_user_in(queue_name, full_name)
         if pos >= 0:
             text = f'{full_name} positions at {queue_name}: {pos}'
         else:

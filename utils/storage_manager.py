@@ -1,7 +1,5 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from typing import Optional
-
-
 
 
 class StorageWriter(ABC):
@@ -22,6 +20,7 @@ class StorageWriter(ABC):
             int: 1 if new queue created, 0 if queue with same name already exists
         """
 
+    @abstractmethod
     def remove_queue(queue_name: str) -> int:
         """Remove queue if it exists
 
@@ -32,6 +31,7 @@ class StorageWriter(ABC):
             int: 1 if removed, 0 if does not exist 
         """
 
+    @abstractmethod
     def add_to_queue(queue_name: str, full_name: str) -> int:
         """Add user fullname to the end of specific queue
 
@@ -45,6 +45,7 @@ class StorageWriter(ABC):
                 -1 if queue does not exist
         """
 
+    @abstractmethod
     def remove_from_queue(queue_name: str, full_name: str) -> int:
         """Remove user fullname from queue. Other users offsets by one stage
 
@@ -66,6 +67,7 @@ class StorageReader(ABC):
     def connect(*args, **kwargs):
         """Connect Reader to storage (json, local/cloud database, google sheets, etc"""
 
+    @abstractmethod
     def get_queue_members(queue_name: str) -> Optional[list[str]]:
         """ See Returns
 
@@ -76,6 +78,7 @@ class StorageReader(ABC):
             Optional[list[str]]: Return list of queue members or None if queue does not exist
         """
         
+    @abstractmethod
     def get_queues() -> dict[str, list[str]]:
         """See Returns
 
@@ -84,6 +87,7 @@ class StorageReader(ABC):
                                 Can be empty
         """
 
+    @abstractmethod
     def get_user_in(queue_name: str, full_name: str) -> int:
         """Return user positions in queue
 
@@ -95,6 +99,7 @@ class StorageReader(ABC):
             int: -1 if queue not exist, -2 if not consist, else position in queue
         """
 
+    @abstractmethod
     def get_user_in_all(full_name: str) -> dict[str, int]:
         """Return user positions in all queues where him consists
 

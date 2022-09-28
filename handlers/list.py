@@ -6,7 +6,7 @@ from bot import dp, sm
 async def list(message: Message):
     args = message.text.split()
     if len(args) == 1:
-        queues = sm.get_queues()
+        queues = await sm.get_queues()
         if queues:
             for q_name, q_members  in queues.items():
                 await display_queue(message, q_name, q_members)
@@ -14,7 +14,7 @@ async def list(message: Message):
             await message.answer('No existing queues')
     else:
         queue_name = ' '.join(args[1:])
-        queue_members = sm.get_queue_members(queue_name)
+        queue_members = await sm.get_queue_members(queue_name)
         if queue_members is None:
             await message.answer(
                 f'"{queue_name}" does not exist'

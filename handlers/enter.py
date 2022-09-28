@@ -12,7 +12,7 @@ async def enter(message: Message):
         )
     else:
         queue_name = ' '.join(args[1:])
-        result = sm.add_to_queue(queue_name, message.from_user.full_name)
+        result = await sm.add_to_queue(queue_name, message.from_user.full_name)
 
         if result >= 0:
             await message.answer(f'You now at "{queue_name}" at position {result}')

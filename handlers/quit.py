@@ -12,7 +12,7 @@ async def quit(message: Message):
         )
     else:
         queue_name = ' '.join(args[1:])
-        result = sm.remove_from_queue(queue_name, message.chat.full_name)
+        result = await sm.remove_from_queue(queue_name, message.chat.full_name)
 
         if result >= 0:
             await message.answer(f'You quit "{queue_name}", {result} people staying')

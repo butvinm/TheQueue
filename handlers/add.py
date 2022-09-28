@@ -12,7 +12,7 @@ async def add(message: Message):
         )
     else:
         queue_name = ' '.join(args[1:])
-        result = sm.add_queue(queue_name)
+        result = await sm.add_queue(queue_name)
         
         if result:
             await message.answer(f'Queue "{queue_name}" successful created')
