@@ -29,7 +29,7 @@ class JsonManager(StorageManager):
             storage_path (str): Path to json file
 
         """
-        self._storage = await open(storage_path, 'r+')
+        self._storage = await open(storage_path, 'r+', encoding='utf-8')
         self.data = await self._read()
 
     async def add_queue(self, queue_name: str) -> int:
