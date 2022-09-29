@@ -14,11 +14,11 @@ async def list(message: Message):
         else:
             await message.answer('No existing queues')
     else:
-        queue_name = ' '.join(args[1:])
-        q_values = await sm.get_queue(queue_name)
+        q_name = ' '.join(args[1:])
+        q_values = await sm.get_queue(q_name)
         if q_values is None:
             await message.answer(
-                f'"{queue_name}" does not exist'
+                f'"{q_name}" does not exist'
             )
         else:
             q_cur, q_users = q_values.values()
