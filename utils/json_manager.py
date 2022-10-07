@@ -78,6 +78,20 @@ class JsonManager(StorageManager):
         await self._write(self.data)
 
         return len(self.data[queue_name]['users'])
+    
+    async def move(self, queue_name: str, pos: int, full_name: str, ) -> int:
+        if queue_name not in self.data:
+            return -1
+
+        if pos > len(self.data[queue_name]['users']) or pos < 1:
+            return -2 
+        
+        if full_name not in self.data[queue_name]['users']:
+            return -3
+
+        self.data[queue_name]['users'].remove(full_name)
+        self.data[queue_name]['users'].insert(pos - 1, full_name)
+        return pos
 
     async def get_queue(self, queue_name: str) -> Optional[dict[str, Any]]:
         return self.data.get(queue_name, None)

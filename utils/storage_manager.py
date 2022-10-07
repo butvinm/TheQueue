@@ -46,15 +46,17 @@ class StorageWriter(ABC):
         """
 
     @abstractmethod
-    def move(self, queue_name: str, pos: int) -> int:
+    def move(self, queue_name: str, pos: int, full_nameL: str) -> int:
         """Move user to new position
 
         Args:
             queue_name (str): Name of target queue
             pos (int): New position in queue
+            full_name (str): Telegram fullname of added user 
 
         Returns:
             int: Positive position in queue if user successful moved,
+                -3 if not user in queue
                 -2 if position out of boundary,
                 -1 if queue does not exists 
         """
