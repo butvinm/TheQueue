@@ -6,11 +6,11 @@ class StorageWriter(ABC):
     """Interface for bot connection with data storage. Write-only"""
 
     @abstractmethod
-    def connect(*args, **kwargs):
+    def connect(self, *args, **kwargs):
         """Connect Writer to storage (json, local/cloud database, google sheets, etc"""
 
     @abstractmethod
-    def add_queue(queue_name: str) -> int:
+    def add_queue(self, queue_name: str) -> int:
         """Create new query, if it does not exist
 
         Args:
@@ -21,7 +21,7 @@ class StorageWriter(ABC):
         """
 
     @abstractmethod
-    def remove_queue(queue_name: str) -> int:
+    def remove_queue(self, queue_name: str) -> int:
         """Remove queue if it exists
 
         Args:
@@ -32,7 +32,7 @@ class StorageWriter(ABC):
         """
 
     @abstractmethod
-    def add_to_queue(queue_name: str, full_name: str) -> int:
+    def add_to_queue(self, queue_name: str, full_name: str) -> int:
         """Add user fullname to the end of specific queue
 
         Args:
@@ -46,7 +46,21 @@ class StorageWriter(ABC):
         """
 
     @abstractmethod
-    def remove_from_queue(queue_name: str, full_name: str) -> int:
+    def move(self, queue_name: str, pos: int) -> int:
+        """Move user to new position
+
+        Args:
+            queue_name (str): Name of target queue
+            pos (int): New position in queue
+
+        Returns:
+            int: Positive position in queue if user successful moved,
+                -2 if position out of boundary,
+                -1 if queue does not exists 
+        """
+        
+    @abstractmethod
+    def remove_from_queue(self, queue_name: str, full_name: str) -> int:
         """Remove user fullname from queue. Other users offsets by one stage
 
         Args:
@@ -86,11 +100,11 @@ class StorageReader(ABC):
     """Interface for bot connection with data storage. Read-only"""
 
     @abstractmethod
-    def connect(*args, **kwargs):
+    def connect(self, *args, **kwargs):
         """Connect Reader to storage (json, local/cloud database, google sheets, etc"""
 
     @abstractmethod
-    def get_queue(queue_name: str) -> Optional[dict[str, Any]]:
+    def get_queue(self, queue_name: str) -> Optional[dict[str, Any]]:
         """ See Returns
 
         Args:
@@ -101,7 +115,7 @@ class StorageReader(ABC):
         """
 
     @abstractmethod
-    def get_queues() -> dict[str, dict[str, Any]]:
+    def get_queues(self) -> dict[str, dict[str, Any]]:
         """See Returns
 
         Returns:
@@ -110,7 +124,7 @@ class StorageReader(ABC):
         """
 
     @abstractmethod
-    def get_user_in(queue_name: str, full_name: str) -> int:
+    def get_user_in(self, queue_name: str, full_name: str) -> int:
         """Return user distance to queue cursor
 
         Args:
@@ -122,7 +136,7 @@ class StorageReader(ABC):
         """
 
     @abstractmethod
-    def get_user_in_all(full_name: str) -> dict[str, int]:
+    def get_user_in_all(self, full_name: str) -> dict[str, int]:
         """Return user distances to cursor in all queues where him consists
 
         Args:
