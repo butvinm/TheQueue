@@ -3,3 +3,4 @@
 __pycache__
 storages
 .venv/
+msg_log.log
