@@ -1,0 +1,19 @@
+{
+	"queues": [
+		{
+			"name": "IT",
+			"pointer": 0,
+			"members": ["asdas", "asdsad"]
+		},
+		{
+			"name": "OPD",
+			"members": ["asdsad"],
+			"pointer": 3
+		},
+		{
+			"name": "Coding",
+			"pointer": -10,
+			"members": []
+		}
+	]
+}
