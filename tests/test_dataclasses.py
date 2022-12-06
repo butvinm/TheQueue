@@ -1,7 +1,9 @@
+from itertools import zip_longest
 import json
 from typing import Any
 import pytest
 from UeUBot.dataclasses import Queues, Messages
+from UeUBot.dataclasses.messages import Chat
 
 
 @pytest.fixture(params=(
@@ -37,9 +39,12 @@ def messages_json(request) -> dict[str, Any]:
 def test_messages_storage_correct(messages_json: list[Any]):
     messages = Messages.from_dict(messages_json)
 
+    assert isinstance(messages, Messages)
     assert isinstance(messages.chats, dict)
+    if messages.chats:
+        assert isinstance(list(messages.chats.values())[0], Chat)
 
-    for chat, origin in zip(messages.chats, messages_json['chats']):
+    for chat, origin in zip_longest(messages.chats.values(), messages_json['chats'].values()):
         assert chat.messages == origin['messages']
 
 
