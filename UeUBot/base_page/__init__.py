@@ -1,4 +1,4 @@
-from .base_page import BasePage
+from .base_page import BasePage, PageOpenCallback
 
 
-__all__ = ['BasePage']
+__all__ = ['BasePage', 'PageOpenCallback']
