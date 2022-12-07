@@ -1,23 +1,28 @@
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.methods import TelegramMethod
 from config import Config
-from page_viewer import PageViewer
-from pages import StartPage
+from handlers import menu, queue, cmd
+from messages_manager import MessagesManager
 
 
 def main():
+    Config.update_config()
+
     logging.basicConfig(level=logging.DEBUG)
 
-    config = Config()
+    TelegramMethod.emit = MessagesManager.register_emit(TelegramMethod.emit)
+
+    bot = Bot(Config.TOKEN)
 
     dp = Dispatcher()
-    bot = Bot(config.TOKEN, parse_mode='HTML')
- 
-    viewer = PageViewer(dp)
-    start_page = StartPage()
-    viewer.register_page(start_page)
-    
+    dp.message.middleware.register(MessagesManager.middleware)
+
+    menu.register_handlers(dp)
+    queue.register_handlers(dp)
+    cmd.register_handlers(dp)
+
     dp.run_polling(bot)
 
 
