@@ -1,3 +1,4 @@
+import logging
 from aiogram import Dispatcher
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
@@ -24,15 +25,17 @@ async def start_handler(message: Message):
 
 
 async def change_name(message: Message):
+    logging.info(f'Rename: {message.from_user.full_name}')
+
     await MessagesManager.clear_chat(message.chat.id)
-    args = message.text.replace('/rename ', '').split('-')
-    if len(args) != 2:
-        await message.answer(
-            'Incorrect format, try: /rename "old name"-"new name"'
+
+    old_name = message.text.replace('/rename', '').strip()
+    if not len(old_name):
+        return await message.answer(
+            'Incorrect format, try:\n /rename CurrentNameInList'
         )
-    
-    old_name = args[0].strip().strip('"')
-    new_name = args[1].strip().strip('"')
+
+    new_name = message.from_user.full_name
 
     queues = get_queues()
     flag = False
@@ -40,7 +43,7 @@ async def change_name(message: Message):
         if old_name in queue.members:
             queue.members[queue.members.index(old_name)] = new_name
             flag = True
-            
+
     update_queues(queues)
     if flag:
         await message.answer(

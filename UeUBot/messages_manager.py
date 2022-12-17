@@ -59,6 +59,5 @@ class MessagesManager:
     @classmethod
     def handle_event(cls, event: TelegramObject) -> None:
         if isinstance(event, Message):
-            print(event.text)
             chat_id = event.chat.id
             cls.messages.setdefault(chat_id, []).append(event)

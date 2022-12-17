@@ -1,10 +1,11 @@
-from asyncio import queues
+import logging
+
 from aiogram import Dispatcher
 from aiogram.types import (CallbackQuery, InlineKeyboardButton,
                            InlineKeyboardMarkup)
-from queues import get_queues, Queue
-from callbacks import OpenMenuCallback, UpdateMenuCallback, OpenQueueCallback
+from callbacks import OpenMenuCallback, OpenQueueCallback, UpdateMenuCallback
 from messages_manager import MessagesManager
+from queues import Queue, get_queues
 
 
 def register_handlers(dp: Dispatcher):
@@ -20,6 +21,8 @@ def register_handlers(dp: Dispatcher):
 
 async def open_menu_handler(query: CallbackQuery):
     await query.answer()
+
+    logging.info(f'Open Menu: {query.data}')
 
     if query.message is not None:
         chat_id = query.message.chat.id
@@ -44,6 +47,8 @@ async def open_menu_handler(query: CallbackQuery):
 
 async def update_menu_handler(query: CallbackQuery):
     await query.answer()
+
+    logging.info(f'Update Menu: {query.data}')
 
     if query.message is not None:
         chat_id = query.message.chat.id

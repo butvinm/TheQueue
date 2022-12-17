@@ -10,7 +10,11 @@ from messages_manager import MessagesManager
 def main():
     Config.update_config()
 
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s %(levelname)s %(module)s - %(funcName)s: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+    )
 
     TelegramMethod.emit = MessagesManager.register_emit(TelegramMethod.emit)
 

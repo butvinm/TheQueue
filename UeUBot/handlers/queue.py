@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Dispatcher
 from aiogram.types import (CallbackQuery, InlineKeyboardButton,
                            InlineKeyboardMarkup)
@@ -37,6 +39,9 @@ def register_handlers(dp: Dispatcher):
 
 async def open_queue_handler(query: CallbackQuery):
     await query.answer()
+
+    logging.info(f'Open Queue: {query.data}')
+
     if query.message is not None:
         chat_id = query.message.chat.id
         await MessagesManager.clear_chat(chat_id)
@@ -66,6 +71,8 @@ async def open_queue_handler(query: CallbackQuery):
 async def update_queue_handler(query: CallbackQuery):
     await query.answer()
 
+    logging.info(f'Update Queue: {query.data}')
+
     if query.message is not None:
         chat_id = query.message.chat.id
         chat_msgs = MessagesManager.get_chat_messages(chat_id)
@@ -84,6 +91,8 @@ async def update_queue_handler(query: CallbackQuery):
 
 async def prev_handler(query: CallbackQuery):
     await query.answer()
+
+    logging.info(f'Prev Queue: {query.data}')
 
     if query.message is not None:
         queue_name = QueuePrevCallback.unpack(query.data or '').queue_name
@@ -108,6 +117,8 @@ async def prev_handler(query: CallbackQuery):
 async def next_handler(query: CallbackQuery):
     await query.answer()
 
+    logging.info(f'Next Queue: {query.data}')
+
     if query.message is not None:
         queue_name = QueueNextCallback.unpack(query.data or '').queue_name
         queue = get_queue(queue_name)
@@ -129,58 +140,70 @@ async def next_handler(query: CallbackQuery):
 
 
 async def up_handler(query: CallbackQuery):
+    logging.info(f'Up Queue: {query.data}')
+
+    if query.message is None:
+        return
+
+    queue_name = QueueUpCallback.unpack(query.data or '').queue_name
+    queue = get_queue(queue_name)
+    if not queue:
+        return
+
+    username = query.from_user.full_name
+    if not username in queue.members:
+        return await query.answer(f'Not such user: {username}')
+
     await query.answer()
+    user_pos = queue.members.index(username)
+    if user_pos < 1:
+        return
 
-    if query.message is not None:
-        queue_name = QueueUpCallback.unpack(query.data or '').queue_name
-        queue = get_queue(queue_name)
-        if not queue:
-            return
+    queue.members.pop(user_pos)
+    queue.members.insert(user_pos - 1, username)
+    update_queue(queue)
 
-        username = query.from_user.full_name
-        if username in queue.members:
-            user_pos = queue.members.index(username)
-            if user_pos > 1:
-                queue.members.pop(user_pos)
-                queue.members.insert(user_pos - 1, username)
+    chat_id = query.message.chat.id
+    chat_msgs = MessagesManager.get_chat_messages(chat_id)
+    if not chat_msgs:
+        return
 
-                update_queue(queue)
-
-        chat_id = query.message.chat.id
-        chat_msgs = MessagesManager.get_chat_messages(chat_id)
-        if not chat_msgs:
-            return
-
-        msg = chat_msgs[-1]
-        await msg.edit_text(text=get_members_list(queue), reply_markup=get_queue_menu_kb(queue.name))
+    msg = chat_msgs[-1]
+    await msg.edit_text(text=get_members_list(queue), reply_markup=get_queue_menu_kb(queue.name))
 
 
 async def down_handler(query: CallbackQuery):
+    logging.info(f'Down Queue: {query.data}')
+
+    if query.message is None:
+        return
+
+    queue_name = QueueDownCallback.unpack(query.data or '').queue_name
+    queue = get_queue(queue_name)
+    if not queue:
+        return
+    
+    username = query.from_user.full_name
+    if not username in queue.members:
+        return await query.answer(f'Not such user: {username}')
+
     await query.answer()
 
-    if query.message is not None:
-        queue_name = QueueDownCallback.unpack(query.data or '').queue_name
-        queue = get_queue(queue_name)
-        if not queue:
-            return
-        username = query.from_user.full_name
-        if username in queue.members:
-            user_pos = queue.members.index(username)
-            if user_pos < len(queue.members) - 1:
-                queue.members.pop(user_pos)
-                queue.members.insert(user_pos + 1, username)
+    user_pos = queue.members.index(username)
+    if user_pos >= len(queue.members) - 1:
+        return 
 
-                update_queue(queue)
+    queue.members.pop(user_pos)
+    queue.members.insert(user_pos + 1, username)
+    update_queue(queue)
 
-        update_queue(queue)
+    chat_id = query.message.chat.id
+    chat_msgs = MessagesManager.get_chat_messages(chat_id)
+    if not chat_msgs:
+        return
 
-        chat_id = query.message.chat.id
-        chat_msgs = MessagesManager.get_chat_messages(chat_id)
-        if not chat_msgs:
-            return
-
-        msg = chat_msgs[-1]
-        await msg.edit_text(text=get_members_list(queue), reply_markup=get_queue_menu_kb(queue.name))
+    msg = chat_msgs[-1]
+    await msg.edit_text(text=get_members_list(queue), reply_markup=get_queue_menu_kb(queue.name))
 
 
 def get_members_list(queue: Queue) -> str:
