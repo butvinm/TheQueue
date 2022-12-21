@@ -1,6 +1,5 @@
 import logging
 
-from aiogram import Dispatcher
 from aiogram.types import (CallbackQuery, InlineKeyboardButton,
                            InlineKeyboardMarkup)
 from callbacks import (OpenMenuCallback, OpenQueueCallback, QueueDownCallback,
@@ -10,62 +9,37 @@ from messages_manager import MessagesManager
 from queues import Queue, get_queue, update_queue
 
 
-def register_handlers(dp: Dispatcher):
-    dp.callback_query.register(
-        open_queue_handler,
-        OpenQueueCallback.filter()
-    )
-    dp.callback_query.register(
-        update_queue_handler,
-        UpdateQueueCallback.filter()
-    )
-    dp.callback_query.register(
-        prev_handler,
-        QueuePrevCallback.filter()
-    )
-    dp.callback_query.register(
-        next_handler,
-        QueueNextCallback.filter()
-    )
-    dp.callback_query.register(
-        down_handler,
-        QueueDownCallback.filter()
-    )
-    dp.callback_query.register(
-        up_handler,
-        QueueUpCallback.filter()
-    )
-
-
 async def open_queue_handler(query: CallbackQuery):
     await query.answer()
 
     logging.info(f'Open Queue: {query.data}')
 
-    if query.message is not None:
-        chat_id = query.message.chat.id
-        await MessagesManager.clear_chat(chat_id)
+    if query.message is None:
+        return
 
-        queue_name = OpenQueueCallback.unpack(query.data or '').queue_name
-        queue = get_queue(queue_name)
-        if not queue:
-            return
+    chat_id = query.message.chat.id
+    await MessagesManager.clear_chat(chat_id)
 
-        await query.message.answer(
-            queue.name,
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(
-                    text='Update',
-                    callback_data=UpdateQueueCallback(
-                        queue_name=queue.name).pack()
-                )
-            ]])
-        )
+    queue_name = OpenQueueCallback.unpack(query.data or '').queue_name
+    queue = get_queue(queue_name)
+    if not queue:
+        return
 
-        await query.message.answer(
-            text=get_members_list(queue),
-            reply_markup=get_queue_menu_kb(queue.name)
-        )
+    await query.message.answer(
+        queue.name,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(
+                text='Update',
+                callback_data=UpdateQueueCallback(
+                    queue_name=queue.name).pack()
+            )
+        ]])
+    )
+
+    await query.message.answer(
+        text=get_members_list(queue),
+        reply_markup=get_queue_menu_kb(queue.name)
+    )
 
 
 async def update_queue_handler(query: CallbackQuery):
@@ -73,20 +47,22 @@ async def update_queue_handler(query: CallbackQuery):
 
     logging.info(f'Update Queue: {query.data}')
 
-    if query.message is not None:
-        chat_id = query.message.chat.id
-        chat_msgs = MessagesManager.get_chat_messages(chat_id)
-        if not chat_msgs:
-            return
+    if query.message is None:
+        return
 
-        msg = chat_msgs[-1]
+    chat_id = query.message.chat.id
+    chat_msgs = MessagesManager.get_chat_messages(chat_id)
+    if not chat_msgs:
+        return
 
-        queue_name = UpdateQueueCallback.unpack(query.data or '').queue_name
-        queue = get_queue(queue_name)
-        if not queue:
-            return
+    msg = chat_msgs[-1]
 
-        await msg.edit_text(text=get_members_list(queue), reply_markup=get_queue_menu_kb(queue.name))
+    queue_name = UpdateQueueCallback.unpack(query.data or '').queue_name
+    queue = get_queue(queue_name)
+    if not queue:
+        return
+
+    await msg.edit_text(text=get_members_list(queue), reply_markup=get_queue_menu_kb(queue.name))
 
 
 async def prev_handler(query: CallbackQuery):
@@ -94,24 +70,26 @@ async def prev_handler(query: CallbackQuery):
 
     logging.info(f'Prev Queue: {query.data}')
 
-    if query.message is not None:
-        queue_name = QueuePrevCallback.unpack(query.data or '').queue_name
-        queue = get_queue(queue_name)
-        if not queue:
-            return
+    if query.message is None:
+        return
 
-        if queue.pointer > 0:
-            queue.pointer -= 1
+    queue_name = QueuePrevCallback.unpack(query.data or '').queue_name
+    queue = get_queue(queue_name)
+    if not queue:
+        return
 
-        update_queue(queue)
+    if queue.pointer > 0:
+        queue.pointer -= 1
 
-        chat_id = query.message.chat.id
-        chat_msgs = MessagesManager.get_chat_messages(chat_id)
-        if not chat_msgs:
-            return
+    update_queue(queue)
 
-        msg = chat_msgs[-1]
-        await msg.edit_text(text=get_members_list(queue), reply_markup=get_queue_menu_kb(queue.name))
+    chat_id = query.message.chat.id
+    chat_msgs = MessagesManager.get_chat_messages(chat_id)
+    if not chat_msgs:
+        return
+
+    msg = chat_msgs[-1]
+    await msg.edit_text(text=get_members_list(queue), reply_markup=get_queue_menu_kb(queue.name))
 
 
 async def next_handler(query: CallbackQuery):
@@ -119,24 +97,26 @@ async def next_handler(query: CallbackQuery):
 
     logging.info(f'Next Queue: {query.data}')
 
-    if query.message is not None:
-        queue_name = QueueNextCallback.unpack(query.data or '').queue_name
-        queue = get_queue(queue_name)
-        if not queue:
-            return
+    if query.message is None:
+        return
 
-        if queue.pointer < len(queue.members) - 1:
-            queue.pointer += 1
+    queue_name = QueueNextCallback.unpack(query.data or '').queue_name
+    queue = get_queue(queue_name)
+    if not queue:
+        return
 
-        update_queue(queue)
+    if queue.pointer < len(queue.members) - 1:
+        queue.pointer += 1
 
-        chat_id = query.message.chat.id
-        chat_msgs = MessagesManager.get_chat_messages(chat_id)
-        if not chat_msgs:
-            return
+    update_queue(queue)
 
-        msg = chat_msgs[-1]
-        await msg.edit_text(text=get_members_list(queue), reply_markup=get_queue_menu_kb(queue.name))
+    chat_id = query.message.chat.id
+    chat_msgs = MessagesManager.get_chat_messages(chat_id)
+    if not chat_msgs:
+        return
+
+    msg = chat_msgs[-1]
+    await msg.edit_text(text=get_members_list(queue), reply_markup=get_queue_menu_kb(queue.name))
 
 
 async def up_handler(query: CallbackQuery):
@@ -182,7 +162,7 @@ async def down_handler(query: CallbackQuery):
     queue = get_queue(queue_name)
     if not queue:
         return
-    
+
     username = query.from_user.full_name
     if not username in queue.members:
         return await query.answer(f'Not such user: {username}')
@@ -191,7 +171,7 @@ async def down_handler(query: CallbackQuery):
 
     user_pos = queue.members.index(username)
     if user_pos >= len(queue.members) - 1:
-        return 
+        return
 
     queue.members.pop(user_pos)
     queue.members.insert(user_pos + 1, username)

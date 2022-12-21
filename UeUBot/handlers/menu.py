@@ -1,22 +1,10 @@
 import logging
 
-from aiogram import Dispatcher
 from aiogram.types import (CallbackQuery, InlineKeyboardButton,
                            InlineKeyboardMarkup)
-from callbacks import OpenMenuCallback, OpenQueueCallback, UpdateMenuCallback
+from callbacks import OpenQueueCallback, UpdateMenuCallback
 from messages_manager import MessagesManager
 from queues import Queue, get_queues
-
-
-def register_handlers(dp: Dispatcher):
-    dp.callback_query.register(
-        open_menu_handler,
-        OpenMenuCallback.filter()
-    )
-    dp.callback_query.register(
-        update_menu_handler,
-        UpdateMenuCallback.filter()
-    )
 
 
 async def open_menu_handler(query: CallbackQuery):

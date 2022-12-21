@@ -3,8 +3,8 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.methods import TelegramMethod
 from config import Config
-from handlers import menu, queue, cmd
 from messages_manager import MessagesManager
+from routers import register_handlers
 
 
 def main():
@@ -23,10 +23,8 @@ def main():
     dp = Dispatcher()
     dp.message.middleware.register(MessagesManager.middleware)
 
-    menu.register_handlers(dp)
-    queue.register_handlers(dp)
-    cmd.register_handlers(dp)
-
+    register_handlers(dp)
+    
     dp.run_polling(bot)
 
 
