@@ -32,7 +32,7 @@ class MessagesManager:
                 await chat_msgs.pop().delete()
             except:
                 pass
-    
+
     @classmethod
     def get_chat_messages(cls, chat_id: int) -> list[Message]:
         return cls.messages.get(chat_id, [])

@@ -6,7 +6,7 @@ from callbacks import (OpenMenuCallback, OpenQueueCallback, QueueDownCallback,
                        QueueNextCallback, QueuePrevCallback, QueueUpCallback,
                        UpdateQueueCallback)
 from messages_manager import MessagesManager
-from queues import Queue, get_queue, update_queue
+from queues_utils import Queue, get_queue, update_queue
 
 
 async def open_queue_handler(query: CallbackQuery):

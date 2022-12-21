@@ -4,7 +4,7 @@ from aiogram.types import (CallbackQuery, InlineKeyboardButton,
                            InlineKeyboardMarkup)
 from callbacks import OpenQueueCallback, UpdateMenuCallback
 from messages_manager import MessagesManager
-from queues import Queue, get_queues
+from queues_utils import Queue, get_queues
 
 
 async def open_menu_handler(query: CallbackQuery):

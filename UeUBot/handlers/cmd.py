@@ -2,7 +2,7 @@ import logging
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from callbacks import OpenMenuCallback
 from messages_manager import MessagesManager
-from queues import get_queues, update_queues
+from queues_utils import get_queues, update_queues
 
 
 async def start_handler(message: Message):
