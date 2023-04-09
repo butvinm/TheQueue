@@ -1,3 +1,0 @@
-aiogram == 3.0.0b6
-python-dotenv
-dataclasses-json
