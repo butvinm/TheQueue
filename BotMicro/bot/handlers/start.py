@@ -1,23 +1,19 @@
 from aiogram import Router
 from aiogram.filters import CommandStart
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
 
-from bot.callbacks.menu import MenuOpenCallback
+from bot.keyboards.common import OpenMenuKeyboard
 
 router = Router()
 
 
 @router.message(CommandStart())
-async def start(message: Message):
+async def start(message: Message, state: FSMContext):
+    await state.clear()
+
     await message.delete()
     await message.answer(
         text='Hi!',
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text='Menu',
-                    callback_data=MenuOpenCallback().pack()
-                )
-            ]
-        ])
+        reply_markup=OpenMenuKeyboard()
     )
