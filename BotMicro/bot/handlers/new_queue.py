@@ -36,7 +36,7 @@ async def new_queue_name_handler(message: Message, bot: Bot, state: FSMContext):
         )
         return
 
-    queue = Queue(name=message.text, creator=message.from_user.id)  # type: ignore
+    queue = Queue(name=message.text, creator=message.chat.id)  # type: ignore
     await queue.save()  # type: ignore
 
     await bot.edit_message_text(
