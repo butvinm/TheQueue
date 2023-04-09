@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks.new_queue import NewQueueStartCallback
-from bot.keyboards.common import OpenMenuKeyboard
+from bot.keyboards.common import MenuAndQueueKeyboard, OpenMenuKeyboard
 from bot.states.new_queue import NewQueueStates
 from models.queue import Queue
 
@@ -42,7 +42,7 @@ async def new_queue_name_handler(message: Message, bot: Bot, state: FSMContext):
     await bot.edit_message_text(
         chat_id=message.chat.id,
         message_id=data['init_message_id'],
-        text=f'Queue successfully created. Enroll key: <code>{queue.key}</code>',
-        reply_markup=OpenMenuKeyboard()
+        text=f'Queue successfully created.',
+        reply_markup=MenuAndQueueKeyboard(queue_name=queue.name, queue_key=queue.key)
     )
     await state.clear()
