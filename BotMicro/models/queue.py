@@ -9,8 +9,11 @@ class Queue(AsyncDetaModel):
     # creator user_id
     creator: int
 
-    # list of user_id and fullname sorted in queue order
-    members: list[tuple[int, str]] = Field(default_factory=list)
+    # members user_ids in queue order
+    members: list[int] = Field(default_factory=list)
+
+    # user_id and fullname sorted in queue order
+    members_names: dict[int, str] = Field(default_factory=dict)
 
     # current queue position
     cursor: int = 0

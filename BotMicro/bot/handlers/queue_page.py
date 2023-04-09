@@ -55,7 +55,7 @@ def build_queue_text(queue: Queue):
     size = len(queue.members)
 
     text = ''
-    for pos, member_data in enumerate(queue.members):
+    for pos, member_id in enumerate(queue.members):
         if pos - queue.cursor < 0:
             tick = '⚫'
         elif pos - queue.cursor == 0:
@@ -69,7 +69,7 @@ def build_queue_text(queue: Queue):
         else:
             tick = '🔴'
 
-        text += f'{tick} {member_data[1]}\n'
+        text += f'{tick} {queue.members_names[member_id]}\n'
 
     return text
 

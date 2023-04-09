@@ -84,10 +84,13 @@ async def confirm_enroll_handler(query: CallbackQuery, message: Message, state: 
         )
         return
 
-    member_data = (message.chat.id, message.chat.full_name)
-    if not member_data in queue.members:
-        queue.members.append(member_data)
-        await queue.save()  # type: ignore
+    chat_id, full_name = message.chat.id, message.chat.full_name
+    if not chat_id in queue.members:
+        queue.members.append(chat_id)
+
+    # always update name to have relevant one
+    queue.members_names[chat_id] = full_name
+    await queue.save()  # type: ignore
 
     await message.edit_text(
         text=f'Queue enrolled: {queue.name}',
