@@ -41,7 +41,9 @@ async def show_queue_for_member(queue: Queue, message: Message):
 
 
 async def show_queue_for_creator(queue: Queue, message: Message):
-    text = f'Queue: <b>{queue.name}</b>\nEnroll key: <code>{queue.key}</code>\n\n'
+    text = f'Queue: <b>{queue.name}</b>\n'
+    text += f'Enroll key: <code>{queue.key}</code>\n'
+    text += f'Enroll link: <code>https://t.me/ueueueueueue_bot?start={queue.key}</code>\n\n'
     text += build_queue_text(queue)
     await message.edit_text(
         text=text,
