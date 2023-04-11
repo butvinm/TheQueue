@@ -1,7 +1,8 @@
 from aiogram.types import InlineKeyboardButton
 from bot.callbacks.menu import MenuOpenCallback
 
-from bot.callbacks.queue_page import CursorDownCallback, CursorUpCallback, DeleteQueueCallback, GoDownCallback, GoUpCallback, LeaveQueueCallback, QueuePageOpenCallback
+from bot.callbacks.queue_manage import CursorDownCallback, CursorUpCallback, DeleteQueueCallback, GoDownCallback, GoUpCallback, LeaveQueueCallback
+from bot.callbacks.queue_page import QueuePageOpenCallback
 
 
 def open_queue_btns(queue_name: str, queue_key: str):
