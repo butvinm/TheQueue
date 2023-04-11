@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Bot, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import (CallbackQuery, InlineKeyboardButton,
                            InlineKeyboardMarkup, Message)
@@ -9,43 +9,47 @@ from bot.callbacks.queue_page import (CursorDownCallback, CursorUpCallback,
                                       GoUpCallback, LeaveQueueCallback,
                                       QueuePageOpenCallback)
 from bot.keyboards.common import OpenMenuKeyboard
+from bot.utils.init_message import edit_init_message
 from models.queue import Queue
 
 router = Router()
 
 
 @router.callback_query(QueuePageOpenCallback.filter())
-async def queue_page_open_handler(query: CallbackQuery, message: Message, callback_data: QueuePageOpenCallback, state: FSMContext):
+async def queue_page_open_handler(query: CallbackQuery, message: Message, callback_data: QueuePageOpenCallback, bot: Bot, state: FSMContext):
     queue = await Queue.get_or_none(callback_data.queue_key)
     if queue is None:
-        await message.edit_text(
+        await edit_init_message(
+            message, bot, state,
             text='Queue not found.',
             reply_markup=OpenMenuKeyboard()
         )
         return
 
     if queue.creator == message.chat.id:
-        await show_queue_for_creator(queue, message)
+        await show_queue_for_creator(queue, message, bot, state)
     else:
-        await show_queue_for_member(queue, message)
+        await show_queue_for_member(queue, message, bot, state)
 
 
-async def show_queue_for_member(queue: Queue, message: Message):
+async def show_queue_for_member(queue: Queue, message: Message, bot: Bot, state: FSMContext):
     text = f'Queue: {queue.name}\n\n'
     text += build_queue_text(queue)
 
-    await message.edit_text(
+    await edit_init_message(
+        message, bot, state,
         text=text,
         reply_markup=InlineKeyboardMarkup(inline_keyboard=build_member_buttons(queue))
     )
 
 
-async def show_queue_for_creator(queue: Queue, message: Message):
+async def show_queue_for_creator(queue: Queue, message: Message, bot: Bot, state: FSMContext):
     text = f'Queue: <b>{queue.name}</b>\n'
     text += f'Enroll key: <code>{queue.key}</code>\n'
     text += f'Enroll link: <code>https://t.me/ueueueueueue_bot?start={queue.key}</code>\n\n'
     text += build_queue_text(queue)
-    await message.edit_text(
+    await edit_init_message(
+        message, bot, state,
         text=text,
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=build_member_buttons(queue) + build_creator_buttons(queue)
