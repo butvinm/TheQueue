@@ -7,8 +7,7 @@ from web.factory import create_app
 
 
 BOT_TOKEN = getenv('BOT_TOKEN')
-WEBHOOK_SECRET = getenv('WEBHOOK_SECRET')
-assert BOT_TOKEN and WEBHOOK_SECRET, 'Set envs, baka!'
+assert BOT_TOKEN
 
 
 deta = Deta()
