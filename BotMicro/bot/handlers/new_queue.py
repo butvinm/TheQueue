@@ -5,6 +5,7 @@ from aiogram.types import CallbackQuery, Message
 from bot.callbacks.new_queue import NewQueueStartCallback
 from bot.keyboards.common import kb_from_btns
 from bot.keyboards.menu import open_menu_btns
+from bot.keyboards.queue_page import open_queue_btns
 from bot.states.common import CommonStates
 from bot.states.new_queue import NewQueueStates
 from bot.utils.init_message import edit_init_message
@@ -41,6 +42,6 @@ async def new_queue_name_handler(message: Message, bot: Bot, state: FSMContext):
     await edit_init_message(
         message, bot, state,
         text=f'Queue successfully created.',
-        reply_markup=kb_from_btns(open_menu_btns())
+        reply_markup=kb_from_btns(open_menu_btns(), open_queue_btns(queue.name, queue.queue_key))
     )
     await state.set_state(CommonStates.none)
