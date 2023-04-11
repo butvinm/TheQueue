@@ -2,7 +2,6 @@ from aiogram import Bot, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-
 from bot.callbacks.my_queues import MyQueuesCallback
 from bot.keyboards.common import kb_from_btns
 from bot.keyboards.menu import open_menu_btns
@@ -15,7 +14,7 @@ router = Router()
 
 @router.callback_query(MyQueuesCallback.filter())
 async def my_queues_handler(query: CallbackQuery, message: Message, callback_data: MyQueuesCallback, bot: Bot, state: FSMContext):
-    queues = await Queue.get_all()
+    queues = await Queue.query(Queue.deleted == False)  # type: ignore
     queues = [queue for queue in queues if (queue.creator == message.chat.id) or (message.chat.id in queue.members)]
 
     await edit_init_message(

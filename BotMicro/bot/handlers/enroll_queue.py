@@ -39,7 +39,7 @@ async def enroll_key_handler(message: Message, bot: Bot, state: FSMContext):
         )
         return
 
-    queue = await Queue.get_or_none(key=message.text)
+    queue = await Queue.get_existed_or_none(queue_key=message.text)
     if queue is None:
         await edit_init_message(
             message, bot, state,
@@ -61,7 +61,7 @@ async def enroll_key_handler(message: Message, bot: Bot, state: FSMContext):
 async def confirm_enroll_handler(query: CallbackQuery, message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
 
-    queue = await Queue.get_or_none(key=data['queue_key'])
+    queue = await Queue.get_existed_or_none(queue_key=data['queue_key'])
     if queue is None:
         await edit_init_message(
             message, bot, state,

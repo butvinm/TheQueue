@@ -14,7 +14,7 @@ router = Router()
 
 @router.callback_query(QueuePageOpenCallback.filter())
 async def queue_page_open_handler(query: CallbackQuery, message: Message, callback_data: QueuePageOpenCallback, bot: Bot, state: FSMContext):
-    queue = await Queue.get_or_none(callback_data.queue_key)
+    queue = await Queue.get_existed_or_none(callback_data.queue_key)
     if queue is None:
         await edit_init_message(
             message, bot, state,
@@ -50,11 +50,11 @@ def build_queue_list(queue: Queue):
             tick = '⚫'
         elif pos - queue.cursor == 0:
             tick = '🔘'
-        elif pos - queue.cursor < size // 4:
+        elif pos - queue.cursor < size / 4:
             tick = '🟢'
-        elif pos - queue.cursor < size // 4 * 2:
+        elif pos - queue.cursor < size / 4 * 2:
             tick = '🟡'
-        elif pos - queue.cursor < size // 4 * 3:
+        elif pos - queue.cursor < size / 4 * 3:
             tick = '🟠'
         else:
             tick = '🔴'

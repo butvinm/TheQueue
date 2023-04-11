@@ -24,7 +24,7 @@ async def start_with_link_handler(message: Message, command: CommandObject, bot:
         )
         return
 
-    queue = await Queue.get_or_none(command.args)
+    queue = await Queue.get_existed_or_none(queue_key=command.args)
     if not queue:
         await edit_init_message(
             message, bot, state,
