@@ -18,6 +18,7 @@ async def errors_handler(event: ErrorEvent):
             'time': time.isoformat(), 
             'exception': repr(event.exception),
             'update': event.update.json()
-        }
+        },
+        expire_in=(60 * 60 * 2)
     )
     

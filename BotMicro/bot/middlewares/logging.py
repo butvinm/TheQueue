@@ -18,7 +18,8 @@ class LoggingMiddleware(BaseMiddleware):
         logging_base = Base('logs')
         logging_base.put(
             key=str(2 * 10**9 - time.timestamp()),
-            data={'time': time.isoformat(), 'update': event.json()}
+            data={'time': time.isoformat(), 'update': event.json()},
+            expire_in=(60 * 60 * 2)
         )
 
         return await handler(event, data)
