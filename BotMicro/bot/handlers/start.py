@@ -35,11 +35,11 @@ async def start_with_link_handler(message: Message, command: CommandObject, bot:
     await edit_init_message(
         message, bot, state,
         text=f'Enroll to queue: {queue.name}?',
-        reply_markup=kb_from_btns(confirm_enroll_btns(queue.key))
+        reply_markup=kb_from_btns(confirm_enroll_btns(queue.queue_key))
     )
 
     await state.set_state(EnrollQueueStates.wait_confirm)
-    await state.update_data(queue_key=queue.key)
+    await state.update_data(queue_key=queue.queue_key)
 
 
 @router.message(CommandStart())

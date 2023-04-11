@@ -25,14 +25,14 @@ async def queue_page_open_handler(query: CallbackQuery, message: Message, callba
 
     text = f'Queue: <b>{queue.name}</b>\n'
     if queue.creator == message.chat.id:
-        text += f'Enroll key: <code>{queue.key}</code>\n'
-        text += f'Enroll link: <code>https://t.me/ueueueueueue_bot?start={queue.key}</code>\n\n'
+        text += f'Enroll key: <code>{queue.queue_key}</code>\n'
+        text += f'Enroll link: <code>https://t.me/ueueueueueue_bot?start={queue.queue_key}</code>\n\n'
 
     text += build_queue_list(queue)
 
-    btns = [queue_member_btns(queue.key)]
+    btns = [queue_member_btns(queue.queue_key)]
     if queue.creator == message.chat.id:
-        btns.append(queue_creator_btns(queue.key))
+        btns.append(queue_creator_btns(queue.queue_key))
 
     await edit_init_message(
         message, bot, state,

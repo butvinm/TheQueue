@@ -3,6 +3,8 @@ from pydantic import Field
 
 
 class Queue(AsyncDetaModel):
+    queue_key: str = Field(alias='key')
+
     # name of queue
     name: str
 

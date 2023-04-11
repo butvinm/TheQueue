@@ -51,10 +51,10 @@ async def enroll_key_handler(message: Message, bot: Bot, state: FSMContext):
     await edit_init_message(
         message, bot, state,
         text=f'Enroll to queue: {queue.name}?',
-        reply_markup=kb_from_btns(confirm_enroll_btns(queue.key))
+        reply_markup=kb_from_btns(confirm_enroll_btns(queue.queue_key))
     )
     await state.set_state(EnrollQueueStates.wait_confirm)
-    await state.update_data(queue_key=queue.key)
+    await state.update_data(queue_key=queue.queue_key)
 
 
 @router.callback_query(EnrollQueueConfirmCallback.filter(), EnrollQueueStates.wait_confirm)
@@ -81,6 +81,6 @@ async def confirm_enroll_handler(query: CallbackQuery, message: Message, bot: Bo
     await edit_init_message(
         message, bot, state,
         text=f'Queue enrolled: {queue.name}',
-        reply_markup=kb_from_btns(open_queue_btns(queue.name, queue.key), open_menu_btns())
+        reply_markup=kb_from_btns(open_queue_btns(queue.name, queue.queue_key), open_menu_btns())
     )
     await state.set_state(CommonStates.none)
