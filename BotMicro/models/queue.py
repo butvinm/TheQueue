@@ -1,3 +1,5 @@
+from typing import Optional
+
 from odetam.async_model import AsyncDetaModel
 from pydantic import Field
 
@@ -19,3 +21,14 @@ class Queue(AsyncDetaModel):
 
     # current queue position
     cursor: int = 0
+
+    # shadow deletion
+    deleted: bool = False
+
+    @classmethod
+    async def get_existed_or_none(cls, queue_key: str) -> Optional['Queue']:
+        queue = await cls.get_or_none(queue_key)
+        if queue and queue.deleted:
+            return None
+        
+        return queue
