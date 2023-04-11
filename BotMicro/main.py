@@ -13,7 +13,7 @@ assert BOT_TOKEN and WEBHOOK_SECRET, 'Set envs, baka!'
 
 deta = Deta()
 
-bot = create_bot(BOT_TOKEN)
+bot, webhook_secret = create_bot(BOT_TOKEN)
 dispatcher = create_dispatcher(deta)
 
 
@@ -21,5 +21,5 @@ app = create_app(
     deta,
     bot,
     dispatcher,
-    WEBHOOK_SECRET
+    webhook_secret
 )
