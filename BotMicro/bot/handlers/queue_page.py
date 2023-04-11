@@ -1,14 +1,11 @@
 from aiogram import Bot, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import (CallbackQuery, InlineKeyboardButton,
-                           InlineKeyboardMarkup, Message)
+from aiogram.types import CallbackQuery, Message
 
-from bot.callbacks.menu import MenuOpenCallback
-from bot.callbacks.queue_page import (CursorDownCallback, CursorUpCallback,
-                                      DeleteQueueCallback, GoDownCallback,
-                                      GoUpCallback, LeaveQueueCallback,
-                                      QueuePageOpenCallback)
-from bot.keyboards.common import OpenMenuKeyboard
+from bot.callbacks.queue_page import QueuePageOpenCallback
+from bot.keyboards.common import kb_from_btns
+from bot.keyboards.menu import open_menu_btns
+from bot.keyboards.queue_page import queue_creator_btns, queue_member_btns
 from bot.utils.init_message import edit_init_message
 from models.queue import Queue
 
@@ -22,42 +19,29 @@ async def queue_page_open_handler(query: CallbackQuery, message: Message, callba
         await edit_init_message(
             message, bot, state,
             text='Queue not found.',
-            reply_markup=OpenMenuKeyboard()
+            reply_markup=kb_from_btns(open_menu_btns())
         )
         return
 
-    if queue.creator == message.chat.id:
-        await show_queue_for_creator(queue, message, bot, state)
-    else:
-        await show_queue_for_member(queue, message, bot, state)
-
-
-async def show_queue_for_member(queue: Queue, message: Message, bot: Bot, state: FSMContext):
-    text = f'Queue: {queue.name}\n\n'
-    text += build_queue_text(queue)
-
-    await edit_init_message(
-        message, bot, state,
-        text=text,
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=build_member_buttons(queue))
-    )
-
-
-async def show_queue_for_creator(queue: Queue, message: Message, bot: Bot, state: FSMContext):
     text = f'Queue: <b>{queue.name}</b>\n'
-    text += f'Enroll key: <code>{queue.key}</code>\n'
-    text += f'Enroll link: <code>https://t.me/ueueueueueue_bot?start={queue.key}</code>\n\n'
-    text += build_queue_text(queue)
+    if queue.creator == message.chat.id:
+        text += f'Enroll key: <code>{queue.key}</code>\n'
+        text += f'Enroll link: <code>https://t.me/ueueueueueue_bot?start={queue.key}</code>\n\n'
+
+    text += build_queue_list(queue)
+
+    btns = [queue_member_btns(queue.key)]
+    if queue.creator == message.chat.id:
+        btns.append(queue_creator_btns(queue.key))
+
     await edit_init_message(
         message, bot, state,
         text=text,
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=build_member_buttons(queue) + build_creator_buttons(queue)
-        )
+        reply_markup=kb_from_btns(*btns)
     )
 
 
-def build_queue_text(queue: Queue):
+def build_queue_list(queue: Queue):
     size = len(queue.members)
 
     text = ''
@@ -78,57 +62,3 @@ def build_queue_text(queue: Queue):
         text += f'{tick} {queue.members_names[member_id]}\n'
 
     return text
-
-
-def build_member_buttons(queue: Queue) -> list[list[InlineKeyboardButton]]:
-    return [
-        [
-            InlineKeyboardButton(
-                text='Update',
-                callback_data=QueuePageOpenCallback(queue_key=queue.key).pack()
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text='Go Up',
-                callback_data=GoUpCallback(queue_key=queue.key).pack()
-            ),
-            InlineKeyboardButton(
-                text='Go Down',
-                callback_data=GoDownCallback(queue_key=queue.key).pack()
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text='Cursor Up',
-                callback_data=CursorUpCallback(queue_key=queue.key).pack()
-            ),
-            InlineKeyboardButton(
-                text='Cursor Down',
-                callback_data=CursorDownCallback(queue_key=queue.key).pack()
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text='Leave Queue',
-                callback_data=LeaveQueueCallback(queue_key=queue.key).pack()
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text='Menu',
-                callback_data=MenuOpenCallback().pack()
-            )
-        ],
-    ]
-
-
-def build_creator_buttons(queue: Queue) -> list[list[InlineKeyboardButton]]:
-    return [
-        [
-            InlineKeyboardButton(
-                text='Delete',
-                callback_data=DeleteQueueCallback(queue_key=queue.key).pack()
-            )
-        ]
-    ]

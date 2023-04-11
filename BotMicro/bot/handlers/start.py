@@ -1,11 +1,11 @@
 from aiogram import Bot, Router
 from aiogram.filters import CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.types import Message
 
-from bot.callbacks.enroll_queue import EnrollQueueConfirmCallback
-from bot.callbacks.menu import MenuOpenCallback
-from bot.keyboards.common import OpenMenuKeyboard
+from bot.keyboards.common import kb_from_btns
+from bot.keyboards.enroll_queue import confirm_enroll_btns
+from bot.keyboards.menu import open_menu_btns
 from bot.states.enroll_queue import EnrollQueueStates
 from bot.utils.init_message import edit_init_message
 from models.queue import Queue
@@ -35,20 +35,7 @@ async def start_with_link_handler(message: Message, command: CommandObject, bot:
     await edit_init_message(
         message, bot, state,
         text=f'Enroll to queue: {queue.name}?',
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text='Confirm',
-                    callback_data=EnrollQueueConfirmCallback(queue_key=queue.key).pack()
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text='Cancel',
-                    callback_data=MenuOpenCallback().pack()
-                )
-            ]
-        ])
+        reply_markup=kb_from_btns(confirm_enroll_btns(queue.key))
     )
 
     await state.set_state(EnrollQueueStates.wait_confirm)
@@ -62,5 +49,5 @@ async def start(message: Message, bot: Bot, state: FSMContext):
     await edit_init_message(
         message, bot, state,
         text='Hi!',
-        reply_markup=OpenMenuKeyboard()
+        reply_markup=kb_from_btns(open_menu_btns())
     )

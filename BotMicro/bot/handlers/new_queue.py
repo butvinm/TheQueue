@@ -3,7 +3,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks.new_queue import NewQueueStartCallback
-from bot.keyboards.common import MenuAndQueueKeyboard, OpenMenuKeyboard
+from bot.keyboards.common import kb_from_btns
+from bot.keyboards.menu import open_menu_btns
 from bot.states.common import CommonStates
 from bot.states.new_queue import NewQueueStates
 from bot.utils.init_message import edit_init_message
@@ -17,7 +18,7 @@ async def new_queue_start_handler(query: CallbackQuery, message: Message, bot: B
     await edit_init_message(
         message, bot, state,
         text='Enter queue name:',
-        reply_markup=OpenMenuKeyboard()
+        reply_markup=kb_from_btns(open_menu_btns())
     )
     await state.set_state(NewQueueStates.name)
 
@@ -30,7 +31,7 @@ async def new_queue_name_handler(message: Message, bot: Bot, state: FSMContext):
         await edit_init_message(
             message, bot, state,
             text='Incorrect name. Try again:',
-            reply_markup=OpenMenuKeyboard()
+            reply_markup=kb_from_btns(open_menu_btns())
         )
         return
 
@@ -40,6 +41,6 @@ async def new_queue_name_handler(message: Message, bot: Bot, state: FSMContext):
     await edit_init_message(
         message, bot, state,
         text=f'Queue successfully created.',
-        reply_markup=MenuAndQueueKeyboard(queue_name=queue.name, queue_key=queue.key)
+        reply_markup=kb_from_btns(open_menu_btns())
     )
     await state.set_state(CommonStates.none)

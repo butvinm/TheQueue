@@ -1,13 +1,12 @@
-from typing import Iterable
-
 from aiogram import Bot, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import (CallbackQuery, InlineKeyboardButton,
-                           InlineKeyboardMarkup, Message)
+from aiogram.types import CallbackQuery, Message
 
-from bot.callbacks.menu import MenuOpenCallback
+
 from bot.callbacks.my_queues import MyQueuesCallback
-from bot.callbacks.queue_page import QueuePageOpenCallback
+from bot.keyboards.common import kb_from_btns
+from bot.keyboards.menu import open_menu_btns
+from bot.keyboards.queues_list import queues_list_btns
 from bot.utils.init_message import edit_init_message
 from models.queue import Queue
 
@@ -22,26 +21,5 @@ async def my_queues_handler(query: CallbackQuery, message: Message, callback_dat
     await edit_init_message(
         message, bot, state,
         text='Your membered or owned queues:',
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=build_queues_buttons(queues)
-        )
+        reply_markup=kb_from_btns(queues_list_btns(queues), open_menu_btns())
     )
-
-
-def build_queues_buttons(queues: Iterable[Queue]) -> list[list[InlineKeyboardButton]]:
-    return [
-        [
-            InlineKeyboardButton(
-                text=queue.name,
-                callback_data=QueuePageOpenCallback(queue_key=queue.key).pack()
-            )
-        ]
-        for queue in queues
-    ] + [
-        [
-            InlineKeyboardButton(
-                text='Menu',
-                callback_data=MenuOpenCallback().pack()
-            )
-        ]
-    ]

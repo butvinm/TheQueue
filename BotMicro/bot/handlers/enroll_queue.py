@@ -1,12 +1,13 @@
 from aiogram import Bot, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import (CallbackQuery, InlineKeyboardButton,
-                           InlineKeyboardMarkup, Message)
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks.enroll_queue import (EnrollQueueConfirmCallback,
                                         EnrollQueueStartCallback)
-from bot.callbacks.menu import MenuOpenCallback
-from bot.keyboards.common import MenuAndQueueKeyboard, OpenMenuKeyboard
+from bot.keyboards.common import kb_from_btns
+from bot.keyboards.enroll_queue import confirm_enroll_btns
+from bot.keyboards.menu import open_menu_btns
+from bot.keyboards.queue_page import open_queue_btns
 from bot.states.common import CommonStates
 from bot.states.enroll_queue import EnrollQueueStates
 from bot.utils.init_message import edit_init_message
@@ -20,7 +21,7 @@ async def enroll_queue_start_handler(query: CallbackQuery, message: Message, bot
     await edit_init_message(
         message, bot, state,
         text='Enter queue enroll key:',
-        reply_markup=OpenMenuKeyboard()
+        reply_markup=kb_from_btns(open_menu_btns())
     )
 
     await state.set_state(EnrollQueueStates.enroll_key)
@@ -34,7 +35,7 @@ async def enroll_key_handler(message: Message, bot: Bot, state: FSMContext):
         await edit_init_message(
             message, bot, state,
             text='Invalid enroll key. Try again:',
-            reply_markup=OpenMenuKeyboard()
+            reply_markup=kb_from_btns(open_menu_btns())
         )
         return
 
@@ -43,27 +44,14 @@ async def enroll_key_handler(message: Message, bot: Bot, state: FSMContext):
         await edit_init_message(
             message, bot, state,
             text='Queue not found. Try again:',
-            reply_markup=OpenMenuKeyboard()
+            reply_markup=kb_from_btns(open_menu_btns())
         )
         return
 
     await edit_init_message(
         message, bot, state,
         text=f'Enroll to queue: {queue.name}?',
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text='Confirm',
-                    callback_data=EnrollQueueConfirmCallback(queue_key=queue.key).pack()
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text='Cancel',
-                    callback_data=MenuOpenCallback().pack()
-                )
-            ]
-        ])
+        reply_markup=kb_from_btns(confirm_enroll_btns(queue.key))
     )
     await state.set_state(EnrollQueueStates.wait_confirm)
     await state.update_data(queue_key=queue.key)
@@ -78,7 +66,7 @@ async def confirm_enroll_handler(query: CallbackQuery, message: Message, bot: Bo
         await edit_init_message(
             message, bot, state,
             text='Queue not found. Try again:',
-            reply_markup=OpenMenuKeyboard()
+            reply_markup=kb_from_btns(open_menu_btns())
         )
         return
 
@@ -93,6 +81,6 @@ async def confirm_enroll_handler(query: CallbackQuery, message: Message, bot: Bo
     await edit_init_message(
         message, bot, state,
         text=f'Queue enrolled: {queue.name}',
-        reply_markup=MenuAndQueueKeyboard(queue.name, queue.key)
+        reply_markup=kb_from_btns(open_queue_btns(queue.name, queue.key), open_menu_btns())
     )
     await state.set_state(CommonStates.none)
