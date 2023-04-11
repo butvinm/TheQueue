@@ -1,4 +1,9 @@
-# Your personal queues manager
+---
+title: "The Queue"
+tagline: "Your personal queues manager in Telegram Bot"
+theme_color: "#ffffff"
+git: "https://github.com/mamsdeveloper/TheQueue"
+---
 
 TheQueue is a Telegram bot for queues managing
 
