@@ -1,12 +1,16 @@
+from random import choices
+from string import ascii_letters, digits
 from typing import Optional
 
 from odetam.async_model import AsyncDetaModel
 from pydantic import Field
 
 
-class Queue(AsyncDetaModel):
-    queue_key: str = Field(alias='key')
+def generate_key() -> str:
+    return ''.join(choices(ascii_letters + digits))
 
+
+class Queue(AsyncDetaModel):
     # name of queue
     name: str
 
@@ -30,5 +34,10 @@ class Queue(AsyncDetaModel):
         queue = await cls.get_or_none(queue_key)
         if queue and queue.deleted:
             return None
-        
+
         return queue
+
+    @property
+    def queue_key(self) -> str:
+        return str(self.key)
+    
