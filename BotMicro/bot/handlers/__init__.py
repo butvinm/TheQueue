@@ -14,11 +14,11 @@ from .start import router as start_router
 router = Router()
 router.include_router(start_router)
 router.include_router(menu_router)
-router.include_router(new_queue_router)
 router.include_router(enroll_queue_router)
 router.include_router(queue_page_router)
 router.include_router(my_queues_router)
 router.include_router(queue_manage_router)
+router.include_router(new_queue_router)
 
 if getenv('ENABLE_ERRORS_LOGS') == 'True':
     router.include_router(error_router)
