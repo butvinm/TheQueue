@@ -7,6 +7,7 @@ from bot.keyboards.common import kb_from_btns
 from bot.keyboards.menu import open_menu_btns
 from bot.keyboards.queue_page import queue_creator_btns, queue_member_btns
 from bot.utils.init_message import edit_init_message
+from bot.utils.link import get_enroll_link
 from models.queue import Queue
 
 router = Router()
@@ -26,7 +27,8 @@ async def queue_page_open_handler(query: CallbackQuery, message: Message, callba
     text = f'Queue: <b>{queue.name}</b>\n'
     if queue.creator == message.chat.id:
         text += f'Enroll key: <code>{queue.queue_key}</code>\n'
-        text += f'Enroll link: <code>https://t.me/ueueueueueue_bot?start={queue.queue_key}</code>\n\n'
+        enroll_link = await get_enroll_link(bot, queue.queue_key)
+        text += f'Enroll link: <code>{enroll_link}</code>\n\n'
 
     text += build_queue_list(queue)
 
